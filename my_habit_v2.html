@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>AnimHabit 🐾</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=M+PLUS+Rounded+1c:wght@400;700;800&display=swap');
+
+  :root {
+    --bg: #FFF8F0;
+    --card: #FFFFFF;
+    --accent1: #FF8B6B;
+    --accent2: #FFD166;
+    --accent3: #06D6A0;
+    --accent4: #118AB2;
+    --purple: #C77DFF;
+    --text: #3D3D3D;
+    --text-soft: #888;
+    --shadow: 0 4px 20px rgba(0,0,0,0.08);
+    --radius: 20px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'M PLUS Rounded 1c', 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding-bottom: 100px;
+    background-image:
+      radial-gradient(circle at 10% 20%, #FFE8D620 0%, transparent 50%),
+      radial-gradient(circle at 90% 80%, #D4F1E820 0%, transparent 50%);
+  }
+
+  /* ── Header ── */
+  .header {
+    background: linear-gradient(135deg, #FF8B6B 0%, #FFD166 100%);
+    padding: 24px 20px 32px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    bottom: -20px;
+    left: 0; right: 0;
+    height: 40px;
+    background: var(--bg);
+    border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+  }
+  .header-title {
+    font-size: 28px;
+    font-weight: 900;
+    color: white;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    letter-spacing: 1px;
+  }
+  .header-date {
+    font-size: 13px;
+    color: rgba(255,255,255,0.85);
+    margin-top: 4px;
+    font-weight: 600;
+  }
+
+  /* ── Pet Section ── */
+  .pet-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 28px 20px 12px;
+  }
+
+  .pet-bubble {
+    width: 130px;
+    height: 130px;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 72px;
+    box-shadow: 0 8px 32px rgba(255,139,107,0.25), 0 2px 8px rgba(0,0,0,0.06);
+    position: relative;
+    animation: petFloat 3s ease-in-out infinite;
+    cursor: pointer;
+    transition: transform 0.1s;
+    user-select: none;
+  }
+  .pet-bubble:active { transform: scale(0.92); }
+
+  @keyframes petFloat {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+
+  .pet-bubble .sparkle {
+    position: absolute;
+    font-size: 18px;
+    animation: sparkleAnim 2s ease-in-out infinite;
+    pointer-events: none;
+  }
+  .pet-bubble .sparkle:nth-child(2) { top: 8px; right: 8px; animation-delay: 0.3s; }
+  .pet-bubble .sparkle:nth-child(3) { bottom: 8px; left: 8px; animation-delay: 0.7s; font-size: 14px; }
+  @keyframes sparkleAnim {
+    0%, 100% { opacity: 0.4; transform: scale(0.8) rotate(0deg); }
+    50% { opacity: 1; transform: scale(1.2) rotate(20deg); }
+  }
+
+  .pet-name {
+    font-size: 20px;
+    font-weight: 800;
+    margin-top: 14px;
+    color: var(--text);
+  }
+  .pet-mood {
+    font-size: 13px;
+    color: var(--text-soft);
+    margin-top: 4px;
+    font-weight: 600;
+  }
+
+  /* ── XP Bar ── */
+  .xp-bar-wrap {
+    width: 100%;
+    max-width: 320px;
+    margin-top: 16px;
+    background: #FFE5DC;
+    border-radius: 99px;
+    height: 14px;
+    overflow: hidden;
+  }
+  .xp-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #FF8B6B, #FFD166);
+    border-radius: 99px;
+    width: 0%;
+    transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .xp-label {
+    font-size: 12px;
+    color: var(--text-soft);
+    margin-top: 6px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+
+  /* ── Section Title ── */
+  .section-title {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--text);
+    padding: 20px 20px 10px;
+    letter-spacing: 0.5px;
+  }
+
+  /* ── Habit Grid ── */
+  .habit-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    padding: 0 20px;
+  }
+
+  .habit-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 18px 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    box-shadow: var(--shadow);
+    cursor: pointer;
+    transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.18s;
+    border: 2.5px solid transparent;
+    position: relative;
+    overflow: hidden;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .habit-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.2s;
+    border-radius: var(--radius);
+  }
+  .habit-card:active { transform: scale(0.94); }
+  .habit-card.done {
+    border-color: currentColor;
+    transform: scale(1.02);
+    box-shadow: 0 6px 24px rgba(0,0,0,0.12);
+  }
+  .habit-card.done::before { opacity: 0.07; background: currentColor; }
+
+  .habit-emoji {
+    font-size: 40px;
+    line-height: 1;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .habit-card.done .habit-emoji { transform: scale(1.18) rotate(-5deg); }
+
+  .habit-label {
+    font-size: 13px;
+    font-weight: 800;
+    text-align: center;
+    line-height: 1.3;
+  }
+  .habit-streak {
+    font-size: 11px;
+    color: var(--text-soft);
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+  }
+  .habit-streak .fire { font-size: 12px; }
+
+  .check-ring {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2.5px solid #DDD;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    font-size: 13px;
+    margin-top: 2px;
+  }
+  .habit-card.done .check-ring {
+    background: currentColor;
+    border-color: currentColor;
+    color: white;
+  }
+  .habit-card.done .check-ring::after { content: '✓'; color: white; font-weight: 900; }
+
+  /* color theming per card */
+  .habit-card[data-color="orange"] { color: #FF8B6B; }
+  .habit-card[data-color="yellow"] { color: #F4A800; }
+  .habit-card[data-color="green"]  { color: #06D6A0; }
+  .habit-card[data-color="blue"]   { color: #118AB2; }
+  .habit-card[data-color="purple"] { color: #C77DFF; }
+  .habit-card[data-color="pink"]   { color: #FF6B9D; }
+
+  .habit-card[data-color="orange"] .habit-streak .fire { filter: none; }
+
+  /* ── Weekly strip ── */
+  .week-strip {
+    display: flex;
+    gap: 6px;
+    padding: 16px 20px 0;
+    justify-content: center;
+  }
+  .day-dot {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+  }
+  .day-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-soft);
+    text-transform: uppercase;
+  }
+  .day-circle {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #EAEAEA;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 800;
+    color: #AAA;
+    transition: all 0.3s;
+  }
+  .day-circle.done {
+    background: linear-gradient(135deg, #FF8B6B, #FFD166);
+    color: white;
+    box-shadow: 0 3px 10px rgba(255,139,107,0.4);
+  }
+  .day-circle.today {
+    background: var(--text);
+    color: white;
+  }
+
+  /* ── Stats row ── */
+  .stats-row {
+    display: flex;
+    gap: 12px;
+    padding: 16px 20px 0;
+  }
+  .stat-card {
+    flex: 1;
+    background: var(--card);
+    border-radius: 16px;
+    padding: 14px 12px;
+    text-align: center;
+    box-shadow: var(--shadow);
+  }
+  .stat-value {
+    font-size: 24px;
+    font-weight: 900;
+    color: var(--text);
+  }
+  .stat-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-soft);
+    margin-top: 2px;
+  }
+
+  /* ── Bottom Nav ── */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: white;
+    padding: 12px 0 20px;
+    display: flex;
+    justify-content: space-around;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+    border-radius: 24px 24px 0 0;
+  }
+  .nav-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px 16px;
+    border-radius: 12px;
+    transition: background 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .nav-btn.active .nav-icon { filter: none; }
+  .nav-icon { font-size: 22px; line-height: 1; }
+  .nav-label { font-size: 10px; font-weight: 700; color: var(--text-soft); font-family: 'M PLUS Rounded 1c', sans-serif; }
+  .nav-btn.active .nav-label { color: var(--accent1); }
+
+  /* ── Pop animation ── */
+  @keyframes pop {
+    0% { transform: scale(1); }
+    40% { transform: scale(1.3); }
+    70% { transform: scale(0.9); }
+    100% { transform: scale(1.02); }
+  }
+  .popping .habit-emoji { animation: pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+  /* ── Toast ── */
+  .toast {
+    position: fixed;
+    bottom: 90px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: #3D3D3D;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 99px;
+    font-size: 13px;
+    font-weight: 700;
+    font-family: 'M PLUS Rounded 1c', sans-serif;
+    opacity: 0;
+    transition: all 0.3s;
+    pointer-events: none;
+    white-space: nowrap;
+    z-index: 999;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* ── Pet tap reaction ── */
+  @keyframes petBounce {
+    0% { transform: translateY(0); }
+    30% { transform: translateY(-20px) scale(1.15); }
+    60% { transform: translateY(4px) scale(0.95); }
+    100% { transform: translateY(0) scale(1); }
+  }
+  .pet-bounce { animation: petBounce 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) !important; }
+
+  /* hearts float */
+  .heart-float {
+    position: fixed;
+    font-size: 20px;
+    pointer-events: none;
+    animation: floatUp 1.2s ease-out forwards;
+    z-index: 999;
+  }
+  @keyframes floatUp {
+    0% { opacity: 1; transform: translateY(0) scale(1); }
+    100% { opacity: 0; transform: translateY(-80px) scale(0.5); }
+  }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <div class="header-title">🐾 AnimHabit</div>
+  <div class="header-date" id="dateLabel"></div>
+</div>
+
+<!-- HOME page -->
+<div id="page-home" class="page">
+
+<!-- Pet Section -->
+<div class="pet-section">
+  <div class="pet-bubble" id="petBubble" onclick="tapPet()">
+    <span class="sparkle">✨</span>
+    <span class="sparkle">⭐</span>
+    <span id="petEmoji">🐱</span>
+  </div>
+  <div class="pet-name" id="petName">みるく</div>
+  <div class="pet-mood" id="petMood">きょうもいっしょにがんばろう！</div>
+
+  <div class="xp-bar-wrap" style="margin-top:14px;">
+    <div class="xp-bar-fill" id="xpBar"></div>
+  </div>
+  <div class="xp-label">Lv.<span id="levelNum">1</span> &nbsp;·&nbsp; <span id="xpText">0 / 6 XP</span></div>
+</div>
+
+<!-- Weekly strip -->
+<div class="section-title">今週のきろく</div>
+<div class="week-strip" id="weekStrip"></div>
+
+<!-- Stats -->
+<div class="stats-row">
+  <div class="stat-card">
+    <div class="stat-value" id="statDone">0</div>
+    <div class="stat-label">きょうの達成</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value" id="statStreak">🔥 0</div>
+    <div class="stat-label">れんぞく日数</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value" id="statTotal">0</div>
+    <div class="stat-label">ぜんぶ達成</div>
+  </div>
+</div>
+
+<!-- Habits -->
+<div class="section-title">きょうのしゅうかん</div>
+<div class="habit-grid" id="habitGrid"></div>
+
+</div><!-- /page-home -->
+
+<!-- きろく Page -->
+<div id="page-record" class="page" style="display:none; padding:20px; padding-bottom:100px;">
+  <div class="section-title" style="padding:0 0 16px;">📊 これまでのきろく</div>
+  <div id="recordList"></div>
+</div>
+
+<!-- ペット Page -->
+<div id="page-pet" class="page" style="display:none; padding:20px; padding-bottom:100px;">
+  <div class="section-title" style="padding:0 0 16px;">🐾 ペットをえらぶ</div>
+  <div id="petSelect" style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:12px; text-align:center;"></div>
+  <div class="section-title" style="padding:24px 0 8px;">なまえをつける</div>
+  <input id="petNameInput" type="text" placeholder="ペットのなまえ"
+    style="width:100%;padding:12px 16px;border-radius:14px;border:2px solid #EEE;font-size:15px;font-family:inherit;outline:none;background:white;">
+  <button onclick="savePetName()"
+    style="width:100%;margin-top:12px;padding:12px;background:linear-gradient(135deg,#FF8B6B,#FFD166);color:white;border:none;border-radius:14px;font-size:15px;font-weight:800;font-family:inherit;cursor:pointer;">
+    保存する
+  </button>
+</div>
+
+<!-- せってい Page -->
+<div id="page-settings" class="page" style="display:none; padding:20px; padding-bottom:100px;">
+  <div class="section-title" style="padding:0 0 16px;">⚙️ せってい</div>
+  <div style="background:white;border-radius:20px;box-shadow:0 4px 20px rgba(0,0,0,0.08);overflow:hidden;">
+    <div onclick="resetToday()"
+      style="padding:16px 20px;border-bottom:1px solid #F0F0F0;display:flex;align-items:center;gap:12px;cursor:pointer;">
+      <span style="font-size:22px;">🔄</span>
+      <div>
+        <div style="font-weight:800;font-size:14px;">きょうのきろくをリセット</div>
+        <div style="font-size:12px;color:#888;margin-top:2px;">今日の達成だけ消えます</div>
+      </div>
+    </div>
+    <div onclick="resetAll()"
+      style="padding:16px 20px;display:flex;align-items:center;gap:12px;cursor:pointer;">
+      <span style="font-size:22px;">🗑️</span>
+      <div>
+        <div style="font-weight:800;font-size:14px;color:#FF6B6B;">ぜんぶリセット</div>
+        <div style="font-size:12px;color:#888;margin-top:2px;">すべてのデータが消えます</div>
+      </div>
+    </div>
+  </div>
+  <div class="section-title" style="padding:24px 0 8px;">アプリについて</div>
+  <div style="background:white;border-radius:20px;padding:16px 20px;box-shadow:0 4px 20px rgba(0,0,0,0.08);font-size:13px;color:#888;line-height:1.8;">
+    🐾 AnimHabit v2.0<br>
+    毎日の習慣をペットといっしょに続けよう！<br>
+    データはこのブラウザに保存されます。
+  </div>
+</div>
+
+<!-- Bottom Nav -->
+<div class="bottom-nav">
+  <button class="nav-btn active" onclick="switchTab('home', this)">
+    <span class="nav-icon">🏠</span>
+    <span class="nav-label">ホーム</span>
+  </button>
+  <button class="nav-btn" onclick="switchTab('record', this)">
+    <span class="nav-icon">📊</span>
+    <span class="nav-label">きろく</span>
+  </button>
+  <button class="nav-btn" onclick="switchTab('pet', this)">
+    <span class="nav-icon">🐾</span>
+    <span class="nav-label">ペット</span>
+  </button>
+  <button class="nav-btn" onclick="switchTab('settings', this)">
+    <span class="nav-icon">⚙️</span>
+    <span class="nav-label">せってい</span>
+  </button>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+  // ── Data ──
+ const HABITS = [
+    { id: 'walk',    emoji: '👟', label: '散歩',       color: 'orange', xp: 1 },
+    { id: 'study',   emoji: '📚', label: '勉強',       color: 'blue',   xp: 1 },
+    { id: 'clean',   emoji: '🧹', label: '掃除',       color: 'green',  xp: 1 },
+    { id: 'video',   emoji: '🎥', label: '動画を見た',  color: 'purple', xp: 1 }, // 
+    { id: 'stretch', emoji: '🧘', label: 'ストレッチ',  color: 'yellow', xp: 1 },
+    { id: 'praise',  emoji: '🥰', label: '自分を褒める', color: 'pink',   xp: 1 }, // 
+  ];
+
+  const PETS = ['🐱','🐶','🐰','🐨','🐼','🦊','🐸','🐹'];
+  const MOODS = [
+    'きょうもいっしょにがんばろう！',
+    'えらい！すごくじょうずだよ！',
+    'もっとやれば もっとなかよし！',
+    'いつもありがとう〜！🍀',
+    'さいこう！だいすきだよ！',
+  ];
+
+  // ── State ──
+  const todayKey = () => new Date().toISOString().slice(0, 10);
+  let state = JSON.parse(localStorage.getItem('animhabit_v2') || '{}');
+
+  const today = todayKey();
+  if (!state.done) state.done = {};
+  if (!state.done[today]) state.done[today] = [];
+  if (!state.streaks) state.streaks = {};
+  if (!state.totalXP) state.totalXP = 0;
+  if (!state.petIndex) state.petIndex = 0;
+
+  const done = () => state.done[today];
+
+  function save() { localStorage.setItem('animhabit_v2', JSON.stringify(state)); }
+
+  // ── Date Label ──
+  const days = ['日','月','火','水','木','金','土'];
+  const now = new Date();
+  document.getElementById('dateLabel').textContent =
+    `${now.getMonth()+1}月${now.getDate()}日（${days[now.getDay()]}）`;
+
+  // ── Weekly strip ──
+  function buildWeekStrip() {
+    const strip = document.getElementById('weekStrip');
+    strip.innerHTML = '';
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(now);
+      d.setDate(d.getDate() - i);
+      const k = d.toISOString().slice(0, 10);
+      const dayDone = (state.done[k] || []).length;
+      const isToday = (k === today);
+      const hasDone = dayDone > 0;
+      const div = document.createElement('div');
+      div.className = 'day-dot';
+      div.innerHTML = `
+        <span class="day-label">${days[d.getDay()]}</span>
+        <span class="day-circle ${hasDone ? 'done' : ''} ${isToday && !hasDone ? 'today' : ''}">
+          ${hasDone ? '✓' : d.getDate()}
+        </span>`;
+      strip.appendChild(div);
+    }
+  }
+
+  // ── Stats ──
+  function updateStats() {
+    const doneToday = done().length;
+    document.getElementById('statDone').textContent = `${doneToday}/${HABITS.length}`;
+
+    // streak: count back days with ≥1 done
+    let streak = 0;
+    for (let i = 0; i < 365; i++) {
+      const d = new Date(now); d.setDate(d.getDate() - i);
+      const k = d.toISOString().slice(0, 10);
+      if ((state.done[k] || []).length > 0) streak++;
+      else break;
+    }
+    document.getElementById('statStreak').textContent = `🔥 ${streak}`;
+
+    let total = 0;
+    for (const k in state.done) total += state.done[k].length;
+    document.getElementById('statTotal').textContent = total;
+  }
+
+  // ── XP / Level ──
+  function updateXP() {
+    const xp = state.totalXP;
+    const level = Math.floor(xp / 6) + 1;
+    const xpInLevel = xp % 6;
+    document.getElementById('levelNum').textContent = level;
+    document.getElementById('xpText').textContent = `${xpInLevel} / 6 XP`;
+    const pct = (xpInLevel / 6) * 100;
+    setTimeout(() => { document.getElementById('xpBar').style.width = pct + '%'; }, 100);
+
+    // Change pet emoji based on saved petIndex
+    const idx = state.petIndex || 0;
+    document.getElementById('petEmoji').textContent = PETS_ALL[idx];
+  }
+
+  // ── Pet mood ──
+  function updatePetMood() {
+    const doneCount = done().length;
+    const moodIdx = Math.min(doneCount, MOODS.length - 1);
+    document.getElementById('petMood').textContent = MOODS[moodIdx];
+  }
+
+  // ── Habit Cards ──
+  function buildHabits() {
+    const grid = document.getElementById('habitGrid');
+    grid.innerHTML = '';
+    HABITS.forEach(h => {
+      const isDone = done().includes(h.id);
+      const streak = state.streaks[h.id] || 0;
+      const card = document.createElement('div');
+      card.className = `habit-card ${isDone ? 'done' : ''}`;
+      card.dataset.color = h.color;
+      card.dataset.id = h.id;
+      card.innerHTML = `
+        <div class="habit-emoji">${h.emoji}</div>
+        <div class="habit-label">${h.label}</div>
+        <div class="habit-streak"><span class="fire">🔥</span>${streak}日</div>
+        <div class="check-ring"></div>
+      `;
+      card.addEventListener('click', () => toggleHabit(h.id, card));
+      grid.appendChild(card);
+    });
+  }
+
+  function toggleHabit(id, card) {
+    const list = done();
+    const idx = list.indexOf(id);
+    if (idx === -1) {
+      // Add
+      list.push(id);
+      state.totalXP++;
+      card.classList.add('done', 'popping');
+      setTimeout(() => card.classList.remove('popping'), 400);
+      showToast('✨ +1 XP');
+      updatePetMood();
+    } else {
+      // Remove
+      list.splice(idx, 1);
+      state.totalXP = Math.max(0, state.totalXP - 1);
+      card.classList.remove('done');
+    }
+    save();
+    updateStats();
+    updateXP();
+    buildWeekStrip();
+  }
+
+  // ── Pet tap ──
+  function tapPet() {
+    const bubble = document.getElementById('petBubble');
+    bubble.classList.add('pet-bounce');
+    bubble.addEventListener('animationend', () => bubble.classList.remove('pet-bounce'), { once: true });
+
+    // Float heart
+    const hearts = ['❤️','🧡','💛','💚','💙','💜','🩷'];
+    const h = document.createElement('div');
+    h.className = 'heart-float';
+    h.textContent = hearts[Math.floor(Math.random() * hearts.length)];
+    const rect = bubble.getBoundingClientRect();
+    h.style.left = (rect.left + rect.width/2 - 10) + 'px';
+    h.style.top  = (rect.top + 10) + 'px';
+    document.body.appendChild(h);
+    setTimeout(() => h.remove(), 1300);
+  }
+
+  // ── Toast ──
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 1800);
+  }
+
+  // ── Tab switching ──
+  const HOME_IDS = ['page-home'];
+  function switchTab(tab, btn) {
+    // Update nav buttons
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    // Show/hide pages
+    const pages = ['page-home','page-record','page-pet','page-settings'];
+    pages.forEach(id => {
+      document.getElementById(id).style.display = (id === 'page-' + tab) ? '' : 'none';
+    });
+
+    if (tab === 'record')   buildRecord();
+    if (tab === 'pet')      buildPetSelect();
+  }
+
+  // ── Record page ──
+  function buildRecord() {
+    const el = document.getElementById('recordList');
+    const now = new Date();
+    const monthLabel = `${now.getFullYear()}年${now.getMonth() + 1}月の記録`;
+    const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+
+    let html = `<div style="background:white; border-radius:20px; padding:20px; box-shadow:var(--shadow);">
+                  <div style="font-weight:800; margin-bottom:15px; color:var(--accent1);">🩷 ${monthLabel}</div>`;
+
+    HABITS.forEach(h => {
+      let count = 0;
+      for (let d = 1; d <= daysInMonth; d++) {
+        const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+        if (state.done[dateStr] && state.done[dateStr].includes(h.id)) {
+          count++;
+        }
+      }
+      const percent = (count / daysInMonth) * 100;
+      html += `
+        <div style="margin-bottom:18px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <div style="font-size:14px; font-weight:800; display:flex; align-items:center; gap:8px;">
+              <span>${h.emoji}</span> <span style="color:${h.color === 'pink' ? '#FF6B9D' : 'var(--text)'}">${h.label}</span>
+            </div>
+            <div style="font-size:12px; font-weight:700; color:var(--text-soft);">${count}/${daysInMonth}</div>
+          </div>
+          <div style="width:100%; height:12px; background:#F0F0F0; border-radius:99px; position:relative; overflow:visible;">
+            <div style="width:${percent}%; height:100%; background:linear-gradient(90deg, #FFB7B2, #FF9AA2); border-radius:99px; transition:width 0.5s;"></div>
+            <div style="position:absolute; left:calc(${percent}% - 10px); top:-6px; font-size:16px;">🩷</div>
+          </div>
+        </div>`;
+    });
+    html += `</div>`;
+    el.innerHTML = html;
+  }
+   
+
+  // ── Pet select page ──
+  const PETS_ALL = ['🐱','🐶','🐰','🐨','🐼','🦊','🐸','🐹','🐧','🦁','🐯','🐮'];
+  function buildPetSelect() {
+    const el = document.getElementById('petSelect');
+    el.innerHTML = PETS_ALL.map((p, i) => {
+      const sel = (state.petIndex === i);
+      return `<div onclick="choosePet(${i})"
+        style="font-size:36px;padding:14px 8px;background:${sel ? 'linear-gradient(135deg,#FF8B6B,#FFD166)' : 'white'};
+        border-radius:16px;cursor:pointer;box-shadow:0 2px 12px rgba(0,0,0,0.08);
+        transition:transform 0.15s;border:${sel ? '2px solid #FF8B6B' : '2px solid transparent'};">${p}</div>`;
+    }).join('');
+    // Set current name in input
+    document.getElementById('petNameInput').value = state.petName || 'みるく';
+  }
+
+  function choosePet(i) {
+    state.petIndex = i;
+    save();
+    buildPetSelect();
+    document.getElementById('petEmoji').textContent = PETS_ALL[i];
+    showToast('ペットをかえたよ！');
+  }
+
+  function savePetName() {
+    const val = document.getElementById('petNameInput').value.trim();
+    if (!val) return;
+    state.petName = val;
+    save();
+    document.getElementById('petName').textContent = val;
+    showToast('なまえをほぞんしたよ！🐾');
+  }
+
+  // ── Settings functions ──
+  function resetToday() {
+    if (!confirm('今日のきろくをリセットしますか？')) return;
+    state.done[today] = [];
+    save();
+    buildHabits();
+    updateStats();
+    updateXP();
+    updatePetMood();
+    buildWeekStrip();
+    showToast('今日のきろくをリセットしました');
+  }
+
+  function resetAll() {
+    if (!confirm('すべてのデータをリセットします。よろしいですか？')) return;
+    localStorage.removeItem('animhabit_v2');
+    location.reload();
+  }
+
+
+  // ── Init ──
+  if (state.petName) document.getElementById('petName').textContent = state.petName;
+  buildWeekStrip();
+  buildHabits();
+  updateStats();
+  updateXP();
+  updatePetMood();
+</script>
+</body>
+</html>
