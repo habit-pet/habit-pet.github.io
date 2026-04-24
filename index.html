@@ -128,4 +128,190 @@
   <div class="section-title" style="padding-left:0;">🐾 ペットをえらぶ</div>
   <div id="petSelect" style="display:grid; grid-template-columns:repeat(4,1fr); gap:10px; background:var(--card); padding:15px; border-radius:20px;"></div>
   <div class="section-title" style="padding:20px 0 8px;">なまえをつける</div>
-  <input id="
+  <input id="petNameInput" type="text" style="width:100%;padding:15px;border-radius:15px;border:2px solid #EEE;background:var(--card);">
+  <button onclick="savePetName()" style="width:100%;margin-top:10px;padding:15px;background:var(--accent1);color:white;border:none;border-radius:15px;font-weight:800;">保存する</button>
+</div>
+
+<div id="page-settings" style="display:none; padding:20px;">
+  <div class="section-title" style="padding-left:0;">⚙️ せってい</div>
+  <div style="background:var(--card); border-radius:20px; padding:20px; box-shadow:var(--shadow); margin-bottom: 20px;">
+    <div style="display:flex; gap:10px; margin-bottom:15px;">
+      <input id="newHabitEmoji" type="text" placeholder="✨" style="width:60px; height:50px; border-radius:12px; border:2px solid #EEE; text-align:center; font-size:24px;">
+      <input id="newHabitLabel" type="text" placeholder="習慣の名前" style="flex:1; height:50px; padding:0 15px; border-radius:12px; border:2px solid #EEE;">
+    </div>
+    <button onclick="addHabit()" style="width:100%; height:50px; background:#06D6A0; color:white; border:none; border-radius:15px; font-weight:800;">＋ 追加する</button>
+    <div id="habitEditList" style="margin-top:15px;"></div>
+  </div>
+
+  <div style="background:var(--card); border-radius:20px; padding:20px; box-shadow:var(--shadow);">
+    <div style="font-weight: 800; font-size: 14px; margin-bottom: 10px;">💾 バックアップと復元</div>
+    <textarea id="backupText" placeholder="ここにバックアップを貼り付け" style="width:100%; height:80px; border-radius:10px; padding:10px; border:1px solid #EEE; font-size:12px; margin-bottom:10px;"></textarea>
+    <div style="display:flex; gap:10px;">
+      <button onclick="exportData()" style="flex:1; padding:12px; background:#666; color:white; border:none; border-radius:10px; font-size:12px; font-weight:800;">📤 書き出す</button>
+      <button onclick="importData()" style="flex:1; padding:12px; background:var(--accent1); color:white; border:none; border-radius:10px; font-size:12px; font-weight:800;">📥 読み込む</button>
+    </div>
+    <div onclick="resetAll()" style="margin-top:20px; text-align:center; color:#FF6B6B; font-size:12px; font-weight:800;">🗑️ 全データを消去</div>
+  </div>
+</div>
+
+<div class="bottom-nav">
+  <button class="nav-btn active" onclick="switchTab('home', this)"><span class="nav-icon">🏠</span><span class="nav-label">ホーム</span></button>
+  <button class="nav-btn" onclick="switchTab('record', this)"><span class="nav-icon">📊</span><span class="nav-label">きろく</span></button>
+  <button class="nav-btn" onclick="switchTab('pet', this)"><span class="nav-icon">🐾</span><span class="nav-label">ペット</span></button>
+  <button class="nav-btn" onclick="switchTab('settings', this)"><span class="nav-icon">⚙️</span><span class="nav-label">せってい</span></button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const se_sound = new Audio('sharan.mp3');
+  const fanfare = new Audio('fanfare.mp3');
+  const PETS_ALL = ['🐱','🐶','🐰','🐨','🐼','🦊','🐸','🐹','🐧','🦁','🐯','🐮'];
+  const MOODS = ['きょうもいっしょに！','えらいね！','そのちょうし！','だいすきだよ！','さいこうだね！','いつもみてるよ🐾','ゆっくりいこう！'];
+  
+  let state = JSON.parse(localStorage.getItem('animhabit_v2') || '{"done":{}, "counts":{}, "totalXP":0, "petIndex":0, "userHabits":[{"id":"walk","emoji":"👟","label":"散歩","color":"orange"},{"id":"praise","emoji":"🥰","label":"自分を褒める","color":"pink"}]}');
+  const today = new Date().toISOString().slice(0, 10);
+  if (!state.done[today]) state.done[today] = [];
+  if (!state.counts[today]) state.counts[today] = {};
+
+  function save() { localStorage.setItem('animhabit_v2', JSON.stringify(state)); }
+
+  function updateXP() {
+    const level = Math.floor(state.totalXP / 6) + 1;
+    const xpInLevel = state.totalXP % 6;
+    document.getElementById('levelNum').textContent = level;
+    document.getElementById('xpText').textContent = `${xpInLevel} / 6 XP`;
+    document.getElementById('xpBar').style.width = (xpInLevel / 6 * 100) + '%';
+    document.getElementById('petEmoji').textContent = PETS_ALL[state.petIndex];
+    document.getElementById('petName').textContent = state.petName || 'みるく';
+  }
+
+  function buildHabits() {
+    const grid = document.getElementById('habitGrid'); grid.innerHTML = '';
+    state.userHabits.forEach(h => {
+      const isDone = state.done[today].includes(h.id);
+      const count = state.counts[today][h.id] || 0;
+      grid.innerHTML += `
+        <div class="habit-card ${isDone?'done':''}" data-color="${h.color}" onclick="toggleHabit('${h.id}', this)">
+          <div style="font-size:40px;">${h.emoji}</div>
+          <div style="font-size:13px; font-weight:800;">${h.label}</div>
+          <div style="font-size:11px; font-weight:700; color:#999;">× ${count}</div>
+        </div>`;
+    });
+  }
+
+  function toggleHabit(id, card) {
+    se_sound.currentTime = 0; se_sound.play().catch(()=>{});
+    const rect = card.getBoundingClientRect();
+    const heart = document.createElement('div'); heart.className = 'heart-float'; heart.textContent = '💖';
+    heart.style.left = (rect.left + rect.width/2 - 10) + 'px'; heart.style.top = rect.top + 'px';
+    document.body.appendChild(heart); setTimeout(()=>heart.remove(), 1200);
+
+    state.counts[today][id] = (state.counts[today][id] || 0) + 1;
+    if (!state.done[today].includes(id)) state.done[today].push(id);
+    state.totalXP++;
+    save(); updateXP(); buildHabits(); showToast('✨ +1 XP'); updatePetMood(); checkWeeklyBonus();
+  }
+
+  function checkWeeklyBonus() {
+    let streak = 0;
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(); d.setDate(d.getDate() - i);
+      const k = d.toISOString().slice(0, 10);
+      if (state.done[k]?.length > 0) streak++; else break;
+    }
+    if (streak >= 7 && state.lastCongratsDate !== today) {
+      fanfare.play().catch(()=>{});
+      document.getElementById('congratsMessage').innerText = "🎊 7日連続達成！ 🎊\nみるくも大喜びだよ！";
+      document.getElementById('congratsOverlay').style.display = 'flex';
+      confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+      state.lastCongratsDate = today; save();
+    }
+  }
+
+  function buildRecord() {
+    const el = document.getElementById('recordList');
+    const now = new Date();
+    const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+    let html = `<div style="background:var(--card); border-radius:20px; padding:20px;">`;
+    state.userHabits.forEach(h => {
+      let count = 0;
+      for (let d = 1; d <= daysInMonth; d++) {
+        const k = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        if (state.done[k]?.includes(h.id)) count++;
+      }
+      const percent = (count / daysInMonth) * 100;
+      html += `<div style="margin-bottom:20px;">
+        <div style="display:flex; justify-content:space-between; margin-bottom:6px; font-size:12px; font-weight:800;">
+          <span>${h.emoji} ${h.label}</span><span>${count}/${daysInMonth}日</span>
+        </div>
+        <div style="width:100%; height:14px; background:rgba(0,0,0,0.05); border-radius:99px; position:relative;">
+          <div style="width:${percent}%; height:100%; background:linear-gradient(90deg, #FF8B6B, #FFD166); border-radius:99px; position:relative; min-width:14px;">
+            <span style="position:absolute; right:-10px; top:-5px; font-size:16px;">💖</span>
+          </div>
+        </div>
+      </div>`;
+    });
+    el.innerHTML = html + `</div>`;
+  }
+
+  function exportData() {
+    const text = JSON.stringify(state);
+    const area = document.getElementById('backupText');
+    area.value = text; area.select();
+    document.execCommand('copy');
+    showToast('コピーしたよ！大切に保存してね');
+  }
+
+  function importData() {
+    const text = document.getElementById('backupText').value;
+    try {
+      const parsed = JSON.parse(text);
+      if (parsed.userHabits) {
+        state = parsed;
+        save();
+        location.reload();
+      } else { throw new Error(); }
+    } catch(e) { alert('バックアップの形式が正しくないみたい…'); }
+  }
+
+  function switchTab(tab, btn) {
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    ['home','record','pet','settings'].forEach(p => document.getElementById('page-'+p).style.display = p === tab ? '' : 'none');
+    if (tab === 'record') buildRecord();
+    if (tab === 'pet') buildPetSelect();
+    if (tab === 'settings') buildHabitEditList();
+    if (tab === 'home') updatePetMood();
+  }
+
+  function updatePetMood() { document.getElementById('petMood').textContent = MOODS[Math.floor(Math.random() * MOODS.length)]; }
+  function tapPet() { updatePetMood(); showToast('なでなで！'); }
+  function buildPetSelect() {
+    const el = document.getElementById('petSelect');
+    el.innerHTML = PETS_ALL.map((p, i) => `<div onclick="choosePet(${i})" style="font-size:30px; padding:10px; background:${state.petIndex===i?'#FFE8D6':'transparent'}; border-radius:12px; text-align:center;">${p}</div>`).join('');
+    document.getElementById('petNameInput').value = state.petName || 'みるく';
+  }
+  function choosePet(i) { state.petIndex = i; save(); buildPetSelect(); updateXP(); }
+  function savePetName() { state.petName = document.getElementById('petNameInput').value; save(); updateXP(); showToast('保存したよ！'); }
+  function addHabit() {
+    const l = document.getElementById('newHabitLabel');
+    if (!l.value) return;
+    state.userHabits.push({ id: 'h_'+Date.now(), emoji: document.getElementById('newHabitEmoji').value||'✨', label: l.value, color: 'orange' });
+    save(); l.value=''; buildHabitEditList(); buildHabits();
+  }
+  function buildHabitEditList() {
+    document.getElementById('habitEditList').innerHTML = state.userHabits.map(h => `<div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #EEE; font-size:13px;"><span>${h.emoji} ${h.label}</span><span onclick="deleteHabit('${h.id}')" style="color:#FF6B6B;">削除</span></div>`).join('');
+  }
+  function deleteHabit(id) { if(confirm('消去する？')) { state.userHabits = state.userHabits.filter(h=>h.id!==id); save(); buildHabitEditList(); buildHabits(); } }
+  function resetAll() { if(confirm('全部消す？')) { localStorage.clear(); location.reload(); } }
+  function showToast(m) { const t = document.getElementById('toast'); t.textContent=m; t.className='toast show'; setTimeout(()=>t.className='toast', 1800); }
+  function closeCongrats() { document.getElementById('congratsOverlay').style.display = 'none'; }
+  
+  const days = ['日','月','火','水','木','金','土'];
+  const now = new Date();
+  document.getElementById('dateLabel').textContent = `${now.getMonth()+1}月${now.getDate()}日（${days[now.getDay()]}）`;
+  updateXP(); buildHabits();
+</script>
+</body>
+</html>
