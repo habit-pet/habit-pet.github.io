@@ -59,6 +59,7 @@
     display: flex; align-items: center; justify-content: center; font-size: 72px;
     box-shadow: 0 8px 32px rgba(0,0,0,0.1); position: relative;
     animation: petFloat 3s ease-in-out infinite; cursor: pointer; user-select: none;
+    transition: transform 0.1s;
   }
   @keyframes petFloat { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-10px); } }
   .pet-name { font-size: 20px; font-weight: 800; margin-top: 14px; text-shadow: 0 2px 4px rgba(255,255,255,0.8); }
@@ -87,8 +88,11 @@
 
   .toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px); background: #3D3D3D; color: white; padding: 10px 20px; border-radius: 99px; font-size: 13px; opacity: 0; transition: 0.3s; z-index: 999; }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-  .heart-float { position: fixed; font-size: 20px; pointer-events: none; animation: floatUp 1.2s forwards; }
-  @keyframes floatUp { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-80px); } }
+  .heart-float { position: fixed; font-size: 24px; pointer-events: none; animation: floatUp 1.2s forwards; z-index: 3000; }
+  @keyframes floatUp {
+    0% { opacity: 1; transform: translateY(0) scale(1); }
+    100% { opacity: 0; transform: translateY(-100px) translateX(20px) scale(1.5); }
+  }
 </style>
 </head>
 <body>
@@ -168,11 +172,7 @@
   const se_sound = new Audio('sharan.mp3');
   const fanfare = new Audio('fanfare.mp3');
   const PETS_ALL = ['🐱','🐶','🐰','🐨','🐼','🦊','🐸','🐹','🐧','🦁','🐯','🐮'];
-  
-  // 動物が喋るセリフ
   const MOODS = ['きょうもいっしょに！','えらいね！','そのちょうし！','だいすきだよ！','さいこうだね！','いつもみてるよ🐾','ゆっくりいこう！'];
-  
-  // なでなでした時のハートの色
   const HEART_COLORS = ['🩷', '🧡', '💛', '💚', '🩵'];
   let heartColorIndex = 0;
 
@@ -183,43 +183,46 @@
 
   function save() { localStorage.setItem('animhabit_v2', JSON.stringify(state)); }
 
-  // --- なでなで機能（カラフルハート） ---
+  // ハートを飛ばす共通関数
+  function spawnHeart(rect) {
+    const heart = document.createElement('div');
+    heart.className = 'heart-float';
+    heart.textContent = HEART_COLORS[heartColorIndex];
+    heartColorIndex = (heartColorIndex + 1) % HEART_COLORS.length;
+    const randomOffset = (Math.random() - 0.5) * 40;
+    heart.style.left = (rect.left + rect.width / 2 - 12 + randomOffset) + 'px';
+    heart.style.top = rect.top + 'px';
+    document.body.appendChild(heart);
+    setTimeout(() => heart.remove(), 1200);
+  }
+
   function tapPet() {
     const b = document.getElementById('petBubble');
     b.style.transform = 'scale(1.1)'; 
     setTimeout(() => b.style.transform = 'scale(1)', 100);
-
-    const rect = b.getBoundingClientRect();
-    const heart = document.createElement('div');
-    heart.className = 'heart-float';
-    
-    // 順番に色を変える
-    heart.textContent = HEART_COLORS[heartColorIndex];
-    heartColorIndex = (heartColorIndex + 1) % HEART_COLORS.length;
-
-    // 出現位置をふわっと散らす
-    const randomOffset = (Math.random() - 0.5) * 40;
-    heart.style.left = (rect.left + rect.width / 2 - 10 + randomOffset) + 'px';
-    heart.style.top = rect.top + 'px';
-    
-    document.body.appendChild(heart);
-    setTimeout(() => heart.remove(), 1200);
-
-    updatePetMood(); // セリフも更新
+    spawnHeart(b.getBoundingClientRect());
+    updatePetMood();
   }
 
-  // --- お祝いファンファーレ（豪華メッセージ） ---
+  function toggleHabit(id, card) {
+    se_sound.currentTime = 0; se_sound.play().catch(()=>{});
+    spawnHeart(card.getBoundingClientRect());
+    state.counts[today][id] = (state.counts[today][id] || 0) + 1;
+    if (!state.done[today].includes(id)) state.done[today].push(id);
+    state.totalXP++;
+    save(); updateXP(); buildHabits(); showToast('✨ +1 XP'); updatePetMood(); checkWeeklyBonus();
+  }
+
   function checkWeeklyBonus() {
     let streak = 0;
     for (let i = 0; i < 7; i++) {
       const d = new Date(); d.setDate(d.getDate() - i);
       const k = d.toISOString().slice(0, 10);
-      if (state.done[k]?.length > 0) streak++; else break;
+      if (state.done[k] && state.done[k].length > 0) streak++; else break;
     }
 
     if (streak >= 7 && state.lastCongratsDate !== today) {
       fanfare.play().catch(()=>{});
-      
       const MSGS = [
         "🌸えらいっ！！🌸\nみるくもびっくり！あなたの継続力は本物だね！",
         "✨ 継続の天才！ ✨\nこの7日間、本当によく頑張ったね。誇りに思うよ！",
@@ -227,11 +230,9 @@
         "🐾 最高のパートナー！ 🐾\nいつも一緒に頑張ってくれてありがとう。大好きだよ！"
       ];
       const randomMsg = MSGS[Math.floor(Math.random() * MSGS.length)];
-      
       document.getElementById('congratsMessage').innerText = randomMsg;
       document.getElementById('congratsOverlay').style.display = 'flex';
       
-      // 紙吹雪を2回飛ばす
       confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
       setTimeout(() => {
         confetti({ particleCount: 100, spread: 100, origin: { y: 0.7 }, colors: ['#FF8B6B', '#FFD166', '#FF6B9D'] });
@@ -241,7 +242,6 @@
     }
   }
 
-  // --- 以下、基本機能 ---
   function updateXP() {
     const level = Math.floor(state.totalXP / 6) + 1;
     const xpInLevel = state.totalXP % 6;
@@ -266,19 +266,6 @@
     });
   }
 
-  function toggleHabit(id, card) {
-    se_sound.currentTime = 0; se_sound.play().catch(()=>{});
-    const rect = card.getBoundingClientRect();
-    const heart = document.createElement('div'); heart.className = 'heart-float'; heart.textContent = '💖';
-    heart.style.left = (rect.left + rect.width/2 - 10) + 'px'; heart.style.top = rect.top + 'px';
-    document.body.appendChild(heart); setTimeout(()=>heart.remove(), 1200);
-
-    state.counts[today][id] = (state.counts[today][id] || 0) + 1;
-    if (!state.done[today].includes(id)) state.done[today].push(id);
-    state.totalXP++;
-    save(); updateXP(); buildHabits(); showToast('✨ +1 XP'); updatePetMood(); checkWeeklyBonus();
-  }
-
   function resetToday() {
     if(confirm('今日の記録をリセットするよ？')) {
       const xpToReduce = state.done[today].reduce((acc, id) => acc + (state.counts[today][id] || 0), 0);
@@ -298,7 +285,7 @@
       let count = 0;
       for (let d = 1; d <= daysInMonth; d++) {
         const k = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-        if (state.done[k]?.includes(h.id)) count++;
+        if (state.done[k] && state.done[k].includes(h.id)) count++;
       }
       const percent = (count / daysInMonth) * 100;
       html += `<div style="margin-bottom:20px;">
@@ -342,7 +329,6 @@
   }
 
   function updatePetMood() { document.getElementById('petMood').textContent = MOODS[Math.floor(Math.random() * MOODS.length)]; }
-  
   function buildPetSelect() {
     const el = document.getElementById('petSelect');
     el.innerHTML = PETS_ALL.map((p, i) => `<div onclick="choosePet(${i})" style="font-size:30px; padding:10px; background:${state.petIndex===i?'#FFE8D6':'transparent'}; border-radius:12px; text-align:center;">${p}</div>`).join('');
@@ -369,6 +355,5 @@
   document.getElementById('dateLabel').textContent = `${now.getMonth()+1}月${now.getDate()}日（${days[now.getDay()]}）`;
   updateXP(); buildHabits();
 </script>
-
 </body>
 </html>
