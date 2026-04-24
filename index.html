@@ -198,6 +198,13 @@
   
   @keyframes petBounce { 0%, 100% { transform: scale(1); } 30% { transform: scale(1.1) translateY(-10px); } }
   .pet-bounce { animation: petBounce 0.4s ease-out; }
+  
+  /* スマホ用入力欄の強制スタイル向上 */
+  input[type="text"] {
+    -webkit-user-select: text !important;
+    user-select: text !important;
+    cursor: text;
+  }
 </style>
 </head>
 <body>
@@ -259,11 +266,12 @@
     
     <div style="display:flex; gap:10px; margin-bottom:15px;">
       <input id="newHabitEmoji" type="text" placeholder="✨" 
-        onclick="this.select()" 
-        style="width:65px; height:54px; padding:10px; border-radius:15px; border:2px solid #EEE; text-align:center; font-size:26px; background:#FDFDFD; -webkit-appearance:none;">
+        onfocus="this.select();" 
+        inputmode="text"
+        style="width:70px; height:54px; line-height:54px; padding:0; border-radius:15px; border:2px solid #EEE; text-align:center; font-size:28px; background:#FDFDFD; display:block;">
       
       <input id="newHabitLabel" type="text" placeholder="習慣の名前を入力" 
-        style="flex:1; height:54px; padding:10px 15px; border-radius:15px; border:2px solid #EEE; outline:none; font-size:16px; background:#FDFDFD; -webkit-appearance:none;">
+        style="flex:1; height:54px; padding:10px 15px; border-radius:15px; border:2px solid #EEE; outline:none; font-size:16px; background:#FDFDFD; display:block;">
     </div>
 
     <button onclick="addHabit()" 
@@ -280,9 +288,8 @@
     <div onclick="exportData()" style="padding:18px;border-bottom:1px solid #F0F0F0;cursor:pointer;">📤 データを書き出す（バックアップ）</div>
     <div onclick="importData()" style="padding:18px;cursor:pointer;">📥 データを読み込む（復元）</div>
   </div>
-</div>
-  
-  <div id="backupArea" style="display:none;">
+
+  <div id="backupArea" style="display:none; margin-top:20px;">
     <p style="font-size:12px; color:var(--text-soft); margin-bottom:8px;">以下の文字をすべてコピーして保存してください：</p>
     <textarea id="backupText" style="width:100%; height:100px; padding:10px; border-radius:10px; border:2px solid #DDD; font-size:10px;"></textarea>
   </div>
@@ -298,19 +305,13 @@
 <div class="toast" id="toast"></div>
 
 <script>
-  // 音源ファイルの読み込み
   const se_sound = new Audio('sharan.mp3'); 
   se_sound.volume = 0.5;
-
-  // 🌸 お祝い用のファンファーレ音
   const congrats_sound = new Audio('fanfare.mp3'); 
   congrats_sound.volume = 0.6;
 
-  // 初期習慣データ
   const DEFAULT_HABITS = [
     { id: 'walk', emoji: '👟', label: '散歩', color: 'orange' },
-    { id: 'study', emoji: '📚', label: '勉強', color: 'blue' },
-    { id: 'clean', emoji: '🧹', label: '掃除', color: 'green' },
     { id: 'praise', emoji: '🥰', label: '自分を褒める', color: 'pink' }, 
   ];
 
@@ -321,7 +322,6 @@
   let state = JSON.parse(localStorage.getItem('animhabit_v2') || '{}');
   const today = todayKey();
 
-  // 初期化
   if (!state.done) state.done = {};
   if (!state.done[today]) state.done[today] = [];
   if (!state.counts) state.counts = {};
@@ -387,9 +387,9 @@
         <div class="habit-emoji">${h.emoji}</div>
         <div class="habit-label">${h.label}</div>
         <div class="habit-streak">× ${count}</div>
-        <div class="check-ring" style="position: relative; background: ${isDone ? 'rgba(0,0,0,0.05)' : 'transparent'}; border-color: ${isDone ? 'currentColor' : '#DDD'};">
-          ${isDone ? '<span style="font-size:10px; font-weight:900; position:absolute; top: -12px; right: -8px; background: white; border-radius:50%; width:16px; height:16px; display:flex; align-items:center; justify-content:center; border:1px solid currentColor;">✓</span>' : ''}
-          <span style="font-size: 16px; font-weight: 800; color: ${isDone ? 'currentColor' : '#DDD'};">${isDone ? '+' : ''}</span>
+        <div class="check-ring">
+          ${isDone ? '<span style="font-size:10px; font-weight:900; position:absolute; top:-12px; right:-8px; background:white; border-radius:50%; width:16px; height:16px; display:flex; align-items:center; justify-content:center; border:1px solid currentColor; color:inherit;">✓</span>' : ''}
+          <span style="font-size: 16px; font-weight: 800;">${isDone ? '+' : ''}</span>
         </div>
       `;
       card.onclick = () => toggleHabit(h.id, card);
@@ -399,25 +399,21 @@
 
   function toggleHabit(id, card) {
     se_sound.currentTime = 0;
-    se_sound.play().catch(e => console.log("音再生:", e));
-
+    se_sound.play().catch(e => {});
     const rect = card.getBoundingClientRect();
     const h = document.createElement('div'); h.className = 'heart-float'; h.textContent = '💖';
     h.style.left = (rect.left + rect.width/2 - 10) + 'px'; h.style.top = (rect.top) + 'px';
     document.body.appendChild(h); setTimeout(() => h.remove(), 1200);
-
     if (!state.counts[today]) state.counts[today] = {};
     state.counts[today][id] = (state.counts[today][id] || 0) + 1;
     if (!state.done[today].includes(id)) state.done[today].push(id);
     state.totalXP++;
-
     save(); updateStats(); updateXP(); updatePetMood(); buildWeekStrip(); buildHabits();
     showToast('✨ +1 XP');
     checkWeeklyBonus();
   }
 
   function checkWeeklyBonus() {
-    // 🌸 確認用設定：i < 1 (1日でも達成でお祝い) / 本番用：i < 7
     let isPerfect = true;
     for (let i = 0; i < 1; i++) { 
       const d = new Date(); d.setDate(d.getDate() - i);
@@ -433,19 +429,13 @@
 
   function showCongrats() {
     congrats_sound.currentTime = 0;
-    congrats_sound.play().catch(e => console.log("音再生:", e));
+    congrats_sound.play().catch(e => {});
     const currentPetName = state.petName || 'みるく';
-    const CONGRATS_MSGS = [
-      "🌸えらいっ！！君の頑張りは誰にも誇れる物だよ🌸",
-      `✨ 継続達成！ ✨\nあなたの努力、${currentPetName}はちゃんと見てたよ！`,
-      "🌈 継続の天才！ 🌈\n一歩ずつ進むあなたが一番輝いてるよ！",
-      "🎊 おめでとう！ 🎊\n毎日頑張るあなたは本当に素敵！",
-      "💮 はなまる満点！ 💮\n自分をたっぷり褒めてあげてね！"
-    ];
+    const CONGRATS_MSGS = ["🌸えらいっ！！🌸", "✨ 継続達成！ ✨", "🌈 継続の天才！ 🌈"];
     const msg = CONGRATS_MSGS[Math.floor(Math.random() * CONGRATS_MSGS.length)];
     document.getElementById('congratsMessage').innerText = msg;
     document.getElementById('congratsOverlay').style.display = 'flex';
-    confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#FF8B6B', '#FFD166', '#06D6A0', '#C77DFF'] });
+    confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
   }
 
   function closeCongrats() { document.getElementById('congratsOverlay').style.display = 'none'; }
@@ -459,16 +449,17 @@
     if (tab === 'settings') buildHabitEditList();
   }
 
-  // 習慣の追加・削除管理
   function addHabit() {
-    const emoji = document.getElementById('newHabitEmoji').value || '🐾';
-    const label = document.getElementById('newHabitLabel').value;
+    const emojiInput = document.getElementById('newHabitEmoji');
+    const labelInput = document.getElementById('newHabitLabel');
+    const emoji = emojiInput.value.trim() || '🐾';
+    const label = labelInput.value.trim();
     if (!label) return alert("名前を入れてね！");
     const colors = ['orange', 'blue', 'green', 'purple', 'yellow', 'pink'];
     state.userHabits.push({ id: 'h_'+Date.now(), emoji: emoji, label: label, color: colors[Math.floor(Math.random()*6)] });
     save();
-    document.getElementById('newHabitEmoji').value = '';
-    document.getElementById('newHabitLabel').value = '';
+    emojiInput.value = '';
+    labelInput.value = '';
     buildHabitEditList(); buildHabits(); showToast('追加したよ！');
   }
 
@@ -524,6 +515,7 @@
     if (!dataStr) return alert("データがありません。");
     document.getElementById('backupArea').style.display = 'block';
     document.getElementById('backupText').value = dataStr;
+    document.getElementById('backupText').focus();
     document.getElementById('backupText').select();
     showToast('コピーして保存してね！');
   }
