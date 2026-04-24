@@ -239,6 +239,10 @@
 <div class="toast" id="toast"></div>
 
 <script>
+  // 音源ファイルの読み込み（sharan.mp3 を使う設定）
+  const se_sound = new Audio('sharan.mp3'); 
+  se_sound.volume = 0.5;
+
   const HABITS = [
     { id: 'walk', emoji: '👟', label: '散歩', color: 'orange' },
     { id: 'study', emoji: '📚', label: '勉強', color: 'blue' },
@@ -306,7 +310,7 @@
   }
 
   function buildHabits() {
-   const grid = document.getElementById('habitGrid');
+    const grid = document.getElementById('habitGrid');
     grid.innerHTML = '';
     HABITS.forEach(h => {
       const isDone = state.done[today].includes(h.id);
@@ -315,8 +319,6 @@
       card.className = `habit-card ${isDone ? 'done' : ''}`;
       card.dataset.color = h.color;
       
-      // ボタンとしての「押しやすさ」を出すための丸い背景（リング）のデザイン
-      // 達成後は背景をうっすら色付けし、中央に「＋」を配置します
       card.innerHTML = `
         <div class="habit-emoji">${h.emoji}</div>
         <div class="habit-label">${h.label}</div>
@@ -332,6 +334,10 @@
   }
 
   function toggleHabit(id, card) {
+    // 【追加】音を鳴らす処理（連続タップ対応）
+    se_sound.currentTime = 0;
+    se_sound.play().catch(e => console.log("音再生の制限:", e));
+
     const rect = card.getBoundingClientRect();
     const h = document.createElement('div'); h.className = 'heart-float'; h.textContent = '💖';
     h.style.left = (rect.left + rect.width/2 - 10) + 'px'; h.style.top = (rect.top) + 'px';
