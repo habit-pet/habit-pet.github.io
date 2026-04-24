@@ -211,13 +211,13 @@
   // --- お祝いファンファーレ（豪華メッセージ） ---
   function checkWeeklyBonus() {
     let streak = 0;
-    for (let i = 0; i < 1; i++) {
+    for (let i = 0; i < 7; i++) {
       const d = new Date(); d.setDate(d.getDate() - i);
       const k = d.toISOString().slice(0, 10);
       if (state.done[k]?.length > 0) streak++; else break;
     }
 
-    if (streak >= 1 && state.lastCongratsDate !== today) {
+    if (streak >= 7 && state.lastCongratsDate !== today) {
       fanfare.play().catch(()=>{});
       
       const MSGS = [
