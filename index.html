@@ -9,25 +9,24 @@
 <meta name="robots" content="noindex, nofollow">
 <title>AnimHabit 🐾</title>
 <style>
-
-/* お祝いポップアップのスタイル */
-.congrats-overlay {
-  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-  background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center;
-  z-index: 2000; display: none; padding: 20px;
-}
-.congrats-card {
-  background: white; border-radius: 30px; padding: 40px 20px; width: 100%; max-width: 320px;
-  text-align: center; position: relative; box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-  animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-@keyframes popIn { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
-.congrats-close {
-  position: absolute; top: 15px; right: 15px; width: 30px; height: 30px;
-  background: #EEE; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-  cursor: pointer; font-size: 18px; font-weight: bold; color: #888;
-}
-.congrats-text { font-size: 20px; font-weight: 800; line-height: 1.6; color: var(--text); }
+  /* お祝いポップアップのスタイル */
+  .congrats-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center;
+    z-index: 2000; display: none; padding: 20px;
+  }
+  .congrats-card {
+    background: white; border-radius: 30px; padding: 40px 20px; width: 100%; max-width: 320px;
+    text-align: center; position: relative; box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  @keyframes popIn { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+  .congrats-close {
+    position: absolute; top: 15px; right: 15px; width: 30px; height: 30px;
+    background: #EEE; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 18px; font-weight: bold; color: #888;
+  }
+  .congrats-text { font-size: 20px; font-weight: 800; line-height: 1.6; color: var(--text); white-space: pre-wrap; }
 
   @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=M+PLUS+Rounded+1c:wght@400;700;800&display=swap');
 
@@ -169,10 +168,10 @@
 
   .habit-card[data-color="orange"] { color: #FF8B6B; }
   .habit-card[data-color="yellow"] { color: #F4A800; }
-  .habit-card[data-color="green"]  { color: #06D6A0; }
-  .habit-card[data-color="blue"]   { color: #118AB2; }
+  .habit-card[data-color="green"]   { color: #06D6A0; }
+  .habit-card[data-color="blue"]    { color: #118AB2; }
   .habit-card[data-color="purple"] { color: #C77DFF; }
-  .habit-card[data-color="pink"]   { color: #FF6B9D; }
+  .habit-card[data-color="pink"]    { color: #FF6B9D; }
 
   .week-strip { display: flex; gap: 6px; padding: 16px 20px 0; justify-content: center; }
   .day-dot { display: flex; flex-direction: column; align-items: center; gap: 5px; }
@@ -254,16 +253,26 @@
 
 <div id="page-settings" style="display:none; padding:20px;">
   <div class="section-title" style="padding-left:0;">⚙️ せってい</div>
+
+  <div class="section-title" style="padding:10px 0;">📋 しゅうかんの追加・削除</div>
+  <div style="background:white; border-radius:20px; padding:16px; box-shadow:var(--shadow); margin-bottom: 20px;">
+    <div style="display:flex; gap:8px; margin-bottom:12px;">
+      <input id="newHabitEmoji" type="text" placeholder="🏠" style="width:45px; padding:10px; border-radius:12px; border:2px solid #EEE; text-align:center; font-size:20px;">
+      <input id="newHabitLabel" type="text" placeholder="新しい習慣の名前" style="flex:1; padding:10px; border-radius:12px; border:2px solid #EEE; outline:none;">
+      <button onclick="addHabit()" style="padding:0 15px; background:#06D6A0; color:white; border:none; border-radius:12px; font-weight:800;">追加</button>
+    </div>
+    <div id="habitEditList"></div>
+  </div>
+
   <div style="background:white;border-radius:20px;overflow:hidden;box-shadow:var(--shadow); margin-bottom: 20px;">
     <div onclick="resetToday()" style="padding:16px;border-bottom:1px solid #F0F0F0;cursor:pointer;">🔄 今日のきろくをリセット</div>
     <div onclick="resetAll()" style="padding:16px;color:#FF6B6B;cursor:pointer;border-bottom:1px solid #F0F0F0;">🗑️ ぜんぶリセット</div>
-    
     <div onclick="exportData()" style="padding:16px;border-bottom:1px solid #F0F0F0;cursor:pointer;">📤 データを書き出す（バックアップ）</div>
     <div onclick="importData()" style="padding:16px;cursor:pointer;">📥 データを読み込む（復元）</div>
   </div>
   
   <div id="backupArea" style="display:none;">
-    <p style="font-size:12px; color:var(--text-soft); margin-bottom:8px;">以下の文字をすべてコピーして、メモ帳などに保存してください：</p>
+    <p style="font-size:12px; color:var(--text-soft); margin-bottom:8px;">以下の文字をすべてコピーして保存してください：</p>
     <textarea id="backupText" style="width:100%; height:100px; padding:10px; border-radius:10px; border:2px solid #DDD; font-size:10px;"></textarea>
   </div>
 </div>
@@ -278,25 +287,22 @@
 <div class="toast" id="toast"></div>
 
 <script>
-  // 音源ファイルの読み込み（sharan.mp3 を使う設定）
+  // 音源ファイルの読み込み
   const se_sound = new Audio('sharan.mp3'); 
   se_sound.volume = 0.5;
 
-
-// 🌸 お祝い用のファンファーレ音を追加
+  // 🌸 お祝い用のファンファーレ音
   const congrats_sound = new Audio('fanfare.mp3'); 
   congrats_sound.volume = 0.6;
 
-
-
-  const HABITS = [
+  // 初期習慣データ
+  const DEFAULT_HABITS = [
     { id: 'walk', emoji: '👟', label: '散歩', color: 'orange' },
     { id: 'study', emoji: '📚', label: '勉強', color: 'blue' },
     { id: 'clean', emoji: '🧹', label: '掃除', color: 'green' },
-    { id: 'video', emoji: '🎥', label: '動画を見た', color: 'purple' }, 
-    { id: 'stretch', emoji: '🧘', label: 'ストレッチ', color: 'yellow' },
     { id: 'praise', emoji: '🥰', label: '自分を褒める', color: 'pink' }, 
   ];
+
   const PETS_ALL = ['🐱','🐶','🐰','🐨','🐼','🦊','🐸','🐹','🐧','🦁','🐯','🐮'];
   const MOODS = ['きょうもいっしょに！','えらいね！','そのちょうし！','だいすきだよ！','さいこうだね！'];
 
@@ -304,11 +310,13 @@
   let state = JSON.parse(localStorage.getItem('animhabit_v2') || '{}');
   const today = todayKey();
 
+  // 初期化
   if (!state.done) state.done = {};
   if (!state.done[today]) state.done[today] = [];
   if (!state.counts) state.counts = {};
   if (!state.totalXP) state.totalXP = 0;
   if (!state.petIndex) state.petIndex = 0;
+  if (!state.userHabits) state.userHabits = DEFAULT_HABITS;
 
   function save() { localStorage.setItem('animhabit_v2', JSON.stringify(state)); }
 
@@ -358,13 +366,12 @@
   function buildHabits() {
     const grid = document.getElementById('habitGrid');
     grid.innerHTML = '';
-    HABITS.forEach(h => {
+    state.userHabits.forEach(h => {
       const isDone = state.done[today].includes(h.id);
       const count = state.counts[today]?.[h.id] || 0;
       const card = document.createElement('div');
       card.className = `habit-card ${isDone ? 'done' : ''}`;
       card.dataset.color = h.color;
-      
       card.innerHTML = `
         <div class="habit-emoji">${h.emoji}</div>
         <div class="habit-label">${h.label}</div>
@@ -380,9 +387,8 @@
   }
 
   function toggleHabit(id, card) {
-    // 音を鳴らす
     se_sound.currentTime = 0;
-    se_sound.play().catch(e => console.log("音再生の制限:", e));
+    se_sound.play().catch(e => console.log("音再生:", e));
 
     const rect = card.getBoundingClientRect();
     const h = document.createElement('div'); h.className = 'heart-float'; h.textContent = '💖';
@@ -394,50 +400,44 @@
     if (!state.done[today].includes(id)) state.done[today].push(id);
     state.totalXP++;
 
-save(); 
-    updateStats(); 
-    updateXP(); 
-    updatePetMood(); 
-    buildWeekStrip(); 
-    buildHabits();
+    save(); updateStats(); updateXP(); updatePetMood(); buildWeekStrip(); buildHabits();
     showToast('✨ +1 XP');
-
-
-// 🌸 ここで関数を「呼び出す」だけにする
-    checkWeeklyBonus(); 
+    checkWeeklyBonus();
   }
 
-  // 🌸 toggleHabitの外に出して、独立した関数にする
   function checkWeeklyBonus() {
-    // テスト時は i < 1 にしてください
+    // 🌸 確認用設定：i < 1 (1日でも達成でお祝い) / 本番用：i < 7
     let isPerfect = true;
-    for (let i = 0; i < 7; i++) { 
+    for (let i = 0; i < 1; i++) { 
       const d = new Date(); d.setDate(d.getDate() - i);
       const k = d.toISOString().slice(0, 10);
-      if (!state.done[k] || state.done[k].length === 0) {
-        isPerfect = false;
-        break;
-      }
+      if (!state.done[k] || state.done[k].length === 0) { isPerfect = false; break; }
     }
-
-if (isPerfect && state.lastCongratsDate !== today) {
+    if (isPerfect && state.lastCongratsDate !== today) {
       showCongrats();
       state.lastCongratsDate = today; 
       save();
     }
-  }    
-
-function closeCongrats() {
-    document.getElementById('congratsOverlay').style.display = 'none';
   }
 
-  function tapPet() {
-    const b = document.getElementById('petBubble'); b.classList.add('pet-bounce');
-    setTimeout(() => b.classList.remove('pet-bounce'), 400);
-    const h = document.createElement('div'); h.className = 'heart-float'; h.textContent = '❤️';
-    const r = b.getBoundingClientRect(); h.style.left = (r.left + r.width/2 - 10) + 'px'; h.style.top = r.top + 'px';
-    document.body.appendChild(h); setTimeout(() => h.remove(), 1200);
+  function showCongrats() {
+    congrats_sound.currentTime = 0;
+    congrats_sound.play().catch(e => console.log("音再生:", e));
+    const currentPetName = state.petName || 'みるく';
+    const CONGRATS_MSGS = [
+      "🌸えらいっ！！君の頑張りは誰にも誇れる物だよ🌸",
+      `✨ 継続達成！ ✨\nあなたの努力、${currentPetName}はちゃんと見てたよ！`,
+      "🌈 継続の天才！ 🌈\n一歩ずつ進むあなたが一番輝いてるよ！",
+      "🎊 おめでとう！ 🎊\n毎日頑張るあなたは本当に素敵！",
+      "💮 はなまる満点！ 💮\n自分をたっぷり褒めてあげてね！"
+    ];
+    const msg = CONGRATS_MSGS[Math.floor(Math.random() * CONGRATS_MSGS.length)];
+    document.getElementById('congratsMessage').innerText = msg;
+    document.getElementById('congratsOverlay').style.display = 'flex';
+    confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#FF8B6B', '#FFD166', '#06D6A0', '#C77DFF'] });
   }
+
+  function closeCongrats() { document.getElementById('congratsOverlay').style.display = 'none'; }
 
   function switchTab(tab, btn) {
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -445,13 +445,43 @@ function closeCongrats() {
     ['home','record','pet','settings'].forEach(p => document.getElementById('page-'+p).style.display = p === tab ? '' : 'none');
     if (tab === 'record') buildRecord();
     if (tab === 'pet') buildPetSelect();
+    if (tab === 'settings') buildHabitEditList();
+  }
+
+  // 習慣の追加・削除管理
+  function addHabit() {
+    const emoji = document.getElementById('newHabitEmoji').value || '🐾';
+    const label = document.getElementById('newHabitLabel').value;
+    if (!label) return alert("名前を入れてね！");
+    const colors = ['orange', 'blue', 'green', 'purple', 'yellow', 'pink'];
+    state.userHabits.push({ id: 'h_'+Date.now(), emoji: emoji, label: label, color: colors[Math.floor(Math.random()*6)] });
+    save();
+    document.getElementById('newHabitEmoji').value = '';
+    document.getElementById('newHabitLabel').value = '';
+    buildHabitEditList(); buildHabits(); showToast('追加したよ！');
+  }
+
+  function deleteHabit(id) {
+    if(!confirm('この習慣を消してもいい？')) return;
+    state.userHabits = state.userHabits.filter(h => h.id !== id);
+    save(); buildHabitEditList(); buildHabits();
+  }
+
+  function buildHabitEditList() {
+    const el = document.getElementById('habitEditList');
+    el.innerHTML = state.userHabits.map(h => `
+      <div style="display:flex; align-items:center; justify-content:space-between; padding:10px 0; border-bottom:1px solid #F8F8F8;">
+        <span style="font-size:14px; font-weight:700;">${h.emoji} ${h.label}</span>
+        <button onclick="deleteHabit('${h.id}')" style="background:#FFEAEA; color:#FF6B6B; border:none; padding:4px 10px; border-radius:8px; font-size:11px; font-weight:800;">削除</button>
+      </div>
+    `).join('');
   }
 
   function buildRecord() {
     const el = document.getElementById('recordList');
     const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
     let html = `<div style="background:white; border-radius:20px; padding:20px; box-shadow:var(--shadow);">`;
-    HABITS.forEach(h => {
+    state.userHabits.forEach(h => {
       let count = 0;
       for (let d = 1; d <= daysInMonth; d++) {
         const k = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
@@ -459,9 +489,8 @@ function closeCongrats() {
       }
       const percent = (count / daysInMonth) * 100;
       html += `<div style="margin-bottom:18px;"><div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:13px; font-weight:800;"><span>${h.emoji} ${h.label}</span><span>${count}/${daysInMonth}</span></div>
-      <div style="width:100%; height:12px; background:#F0F0F0; border-radius:99px; position:relative; overflow:visible;">
+      <div style="width:100%; height:12px; background:#F0F0F0; border-radius:99px; position:relative;">
         <div style="width:${percent}%; height:100%; background:linear-gradient(90deg, #FFB7B2, #FF9AA2); border-radius:99px;"></div>
-        <div style="position:absolute; left:calc(${percent}% - 10px); top:-6px; font-size:16px;">💖</div>
       </div></div>`;
     });
     el.innerHTML = html + `</div>`;
@@ -478,72 +507,34 @@ function closeCongrats() {
   function resetToday() { if(confirm('リセット？')){ state.done[today]=[]; state.counts[today]={}; save(); location.reload(); }}
   function resetAll() { if(confirm('全消去？')){ localStorage.clear(); location.reload(); }}
   function showToast(m) { const t = document.getElementById('toast'); t.textContent = m; t.className = 'toast show'; setTimeout(() => t.className = 'toast', 1800); }
-
-// データを文字にして書き出す
+  
   function exportData() {
     const dataStr = localStorage.getItem('animhabit_v2');
-    if (!dataStr) {
-      alert("保存されているデータがありません。");
-      return;
-    }
-    // テキストエリアに表示
+    if (!dataStr) return alert("データがありません。");
     document.getElementById('backupArea').style.display = 'block';
     document.getElementById('backupText').value = dataStr;
-    document.getElementById('backupText').select(); // 自動で全選択状態にする
+    document.getElementById('backupText').select();
     showToast('コピーして保存してね！');
   }
 
-  // 文字を読み込んで復元する
   function importData() {
-    const code = prompt("保存した「バックアップの文字」をここに貼り付けてください：");
+    const code = prompt("バックアップの文字を貼り付けてください：");
     if (code) {
-      try {
-        // 貼り付けた文字が正しい形式かチェック
-        JSON.parse(code); 
-        // データを保存
-        localStorage.setItem('animhabit_v2', code);
-        alert("データの読み込みが完了しました！再起動します。");
-        location.reload(); // 画面を更新して反映
-      } catch (e) {
-        alert("エラー：文字が正しくありません。コピーミスがないか確認してください。");
-      }
+      try { JSON.parse(code); localStorage.setItem('animhabit_v2', code); alert("復元完了！"); location.reload(); }
+      catch (e) { alert("エラー：文字が正しくありません。"); }
     }
+  }
+
+  function tapPet() {
+    const b = document.getElementById('petBubble'); b.classList.add('pet-bounce');
+    setTimeout(() => b.classList.remove('pet-bounce'), 400);
+    const h = document.createElement('div'); h.className = 'heart-float'; h.textContent = '❤️';
+    const r = b.getBoundingClientRect(); h.style.left = (r.left + r.width/2 - 10) + 'px'; h.style.top = r.top + 'px';
+    document.body.appendChild(h); setTimeout(() => h.remove(), 1200);
   }
 
   if (state.petName) document.getElementById('petName').textContent = state.petName;
   updateStats(); buildWeekStrip(); updateXP(); updatePetMood(); buildHabits();
-
-function showCongrats() {
-// 🌸 お祝いの音を鳴らす！
-    congrats_sound.currentTime = 0;
-    congrats_sound.play().catch(e => console.log("音再生の制限:", e));
-
-
-    // 今のペットの名前を取得（未設定なら 'みるく'）
-    const currentPetName = state.petName || 'みるく';
-
-    const CONGRATS_MSGS = [
-      "🌸えらいっ！！君の頑張りは誰にも誇れる物だよ🌸",
-      `✨ 1週間継続達成！ ✨\nあなたの努力、${currentPetName}はちゃんと見てたよ！`,
-      "🌈 継続の天才！ 🌈\n一歩ずつ進むあなたが一番輝いてるよ！",
-      "🎊 おめでとう！ 🎊\nこの1週間であなたはもっと素敵になったよ！",
-      "💮 はなまる満点！ 💮\n自分をたっぷり褒めてあげてね！"
-    ];
-
-   const msg = CONGRATS_MSGS[Math.floor(Math.random() * CONGRATS_MSGS.length)];
-    document.getElementById('congratsMessage').innerText = msg;
-    document.getElementById('congratsOverlay').style.display = 'flex';
-
-
-    // 紙吹雪を飛ばす！
-    confetti({
-      particleCount: 150,
-      spread: 70,
-      origin: { y: 0.6 },
-      colors: ['#FF8B6B', '#FFD166', '#06D6A0', '#C77DFF']
-    });
-  }
-
 </script>
 </body>
 </html>
