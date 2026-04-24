@@ -282,6 +282,13 @@
   const se_sound = new Audio('sharan.mp3'); 
   se_sound.volume = 0.5;
 
+
+// 🌸 お祝い用のファンファーレ音を追加
+  const congrats_sound = new Audio('fanfare.mp3'); 
+  congrats_sound.volume = 0.6;
+
+
+
   const HABITS = [
     { id: 'walk', emoji: '👟', label: '散歩', color: 'orange' },
     { id: 'study', emoji: '📚', label: '勉強', color: 'blue' },
@@ -507,6 +514,11 @@ function closeCongrats() {
   updateStats(); buildWeekStrip(); updateXP(); updatePetMood(); buildHabits();
 
 function showCongrats() {
+// 🌸 お祝いの音を鳴らす！
+    congrats_sound.currentTime = 0;
+    congrats_sound.play().catch(e => console.log("音再生の制限:", e));
+
+
     // 今のペットの名前を取得（未設定なら 'みるく'）
     const currentPetName = state.petName || 'みるく';
 
@@ -518,12 +530,13 @@ function showCongrats() {
       "💮 はなまる満点！ 💮\n自分をたっぷり褒めてあげてね！"
     ];
 
-    const msg = CONGRATS_MSGS[Math.floor(Math.random() * CONGRATS_MSGS.length)];
+   const msg = CONGRATS_MSGS[Math.floor(Math.random() * CONGRATS_MSGS.length)];
     document.getElementById('congratsMessage').innerText = msg;
     document.getElementById('congratsOverlay').style.display = 'flex';
-    
+
+
     // 紙吹雪を飛ばす！
-    confetti({
+    onfetti({
       particleCount: 150,
       spread: 70,
       origin: { y: 0.6 },
