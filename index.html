@@ -411,7 +411,7 @@ save();
   function checkWeeklyBonus() {
     // テスト時は i < 1 にしてください
     let isPerfect = true;
-    for (let i = 0; i < 1; i++) { 
+    for (let i = 0; i < 7; i++) { 
       const d = new Date(); d.setDate(d.getDate() - i);
       const k = d.toISOString().slice(0, 10);
       if (!state.done[k] || state.done[k].length === 0) {
